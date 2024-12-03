@@ -1,0 +1,9 @@
+---
+title: "Exploring Health Disparities in Saudi Arabia: A Satatistical Analysis"
+output: html_document
+---
+
+
+Talk about the disesaes in Saudi Arabia and why it is important to conduct analysis, estimate the relative risk will give decesion amkers what are teh regiosn wh need to target for intervensions 
+
+# Background 

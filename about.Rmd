@@ -1,0 +1,176 @@
+---
+title: "Untitled"
+author: "Hanan Alahmadi"
+date: "2024-12-03"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r, echo=FALSE, warning=FALSE, message=FALSE, comment=NA, fig.width=12, fig.height=12}
+
+
+# Load libraries
+library(sf)
+library(ggplot2)
+library(rgeoboundaries)
+library(rnaturalearth)
+library(readxl)
+library(terra)
+library(ggtext)
+library(stringr)
+library(ggrepel)
+
+# Set working directory
+setwd("~/Desktop/web/HealthDisparites")
+
+# Get the map of Saudi Arabia using 'rnaturalearth' package
+map <- ne_states(country = "Saudi Arabia", returnclass = "sf")
+
+# Adjust region names to match data
+map$name[1]= "Eastern Province"
+map$name[2] = "Northern Borders"
+map$name[3] = "Al Jawf"
+map$name[4] = "Najran"
+map$name[5] = "Asir"
+map$name[6] = "Jazan"
+map$name[7] = "Tabuk"
+map$name[8] = "Madinah"
+map$name[9] = "Makkah"
+map$name[10] = "Riyadh"
+map$name[11] = "Al Qassim"
+map$name[12] = "Ha'il"
+map$name[13] = "Al Bahah"
+
+# Set projection
+map <- st_set_crs(map, 4326)
+map <- map[order(map$name),]
+
+# Read data
+data <- read_excel("Data/Diabetes.xlsx")
+data <- as.data.frame(data)  # Convert to data frame
+data <- data[order(data$name), ]  # Alphabetically ordered by region name
+
+# Wrap region names for better label appearance
+map$name_wrapped <- str_wrap(map$name, width = 10)
+
+# Calculate centroids of polygons for label placement
+map_centroids <- st_centroid(map)
+
+
+library(ggplot2)
+library(gridExtra)
+library(patchwork)
+
+# Ensure `map` and `map_centroids` are already prepared and contain required data
+
+# Create individual maps
+map$diabetes <- data$Diabetes
+p1 <- ggplot() +
+  geom_sf(data = map, aes(fill = diabetes), color = "#231f20") +
+  geom_sf_label(data = map_centroids, aes(label = name_wrapped),
+                size = 3, color = "#54585C", fill = "#fffffc",
+                label.padding = unit(0.25, "lines"), label.r = unit(0.35, "lines"),
+                nudge_x = ifelse(map$name == "Tabuk", -0.10,
+                                 ifelse(map$name == "Northern Borders", 0.7, 0)),
+                nudge_y = ifelse(map$name == "Tabuk", 0.5,
+                                 ifelse(map$name == "Northern Borders", -0.50, 0))) +
+  labs(fill = "Diabetes") +
+  scale_fill_gradientn(colors = c("#f2f8fa", "#b4e0e2", "#88c4cd", "#73b2b5"),
+                       breaks = seq(0, max(map$diabetes), length.out = 5),
+                       labels = scales::comma(seq(0, max(map$diabetes), length.out = 5))) +
+  theme_void()
+
+map$Abnormal_WHR <- data$Abnormal_WHR
+p2 <- ggplot() +
+  geom_sf(data = map, aes(fill = Abnormal_WHR), color = "#231f20") +
+  geom_sf_label(data = map_centroids, aes(label = name_wrapped),
+                size = 3, color = "#54585C", fill = "#fffffc",
+                label.padding = unit(0.25, "lines"), label.r = unit(0.35, "lines"),
+                nudge_x = ifelse(map$name == "Tabuk", -0.10,
+                                 ifelse(map$name == "Northern Borders", 0.7, 0)),
+                nudge_y = ifelse(map$name == "Tabuk", 0.5,
+                                 ifelse(map$name == "Northern Borders", -0.50, 0))) +
+  labs(fill = "Abnormal WHR") +
+  scale_fill_gradientn(colors = c("#f2f8fa", "#b4e0e2", "#88c4cd", "#73b2b5"),
+                       breaks = seq(0, max(map$Abnormal_WHR), length.out = 5),
+                       labels = scales::comma(seq(0, max(map$Abnormal_WHR), length.out = 5))) +
+  theme_void()
+
+map$dys <- data$Dyslipdemia
+p3 <- ggplot() +
+  geom_sf(data = map, aes(fill = dys), color = "#231f20") +
+  geom_sf_label(data = map_centroids, aes(label = name_wrapped),
+                size = 3, color = "#54585C", fill = "#fffffc",
+                label.padding = unit(0.25, "lines"), label.r = unit(0.35, "lines"),
+                nudge_x = ifelse(map$name == "Tabuk", -0.10,
+                                 ifelse(map$name == "Northern Borders", 0.7, 0)),
+                nudge_y = ifelse(map$name == "Tabuk", 0.5,
+                                 ifelse(map$name == "Northern Borders", -0.50, 0))) +
+  labs(fill = "Dyslipidemia") +
+  scale_fill_gradientn(colors = c("#f2f8fa", "#b4e0e2", "#88c4cd", "#73b2b5"),
+                       breaks = seq(0, max(map$dys), length.out = 5),
+                       labels = scales::comma(seq(0, max(map$dys), length.out = 5))) +
+  theme_void()
+
+map$glu <- data$Elevated_Glucose
+p4 <- ggplot() +
+  geom_sf(data = map, aes(fill = glu), color = "#231f20") +
+  geom_sf_label(data = map_centroids, aes(label = name_wrapped),
+                size = 3, color = "#54585C", fill = "#fffffc",
+                label.padding = unit(0.25, "lines"), label.r = unit(0.35, "lines"),
+                nudge_x = ifelse(map$name == "Tabuk", -0.10,
+                                 ifelse(map$name == "Northern Borders", 0.7, 0)),
+                nudge_y = ifelse(map$name == "Tabuk", 0.5,
+                                 ifelse(map$name == "Northern Borders", -0.50, 0))) +
+  labs(fill = "Elevated Glucose") +
+  scale_fill_gradientn(colors = c("#f2f8fa", "#b4e0e2", "#88c4cd", "#73b2b5"),
+                       breaks = seq(0, max(map$glu), length.out = 5),
+                       labels = scales::comma(seq(0, max(map$glu), length.out = 5))) +
+  theme_void()
+
+map$ide <- data$Insufficient_Diet_and_Exercise
+p5 <- ggplot() +
+  geom_sf(data = map, aes(fill = ide), color = "#231f20") +
+  geom_sf_label(data = map_centroids, aes(label = name_wrapped),
+                size = 3, color = "#54585C", fill = "#fffffc",
+                label.padding = unit(0.25, "lines"), label.r = unit(0.35, "lines"),
+                nudge_x = ifelse(map$name == "Tabuk", -0.10,
+                                 ifelse(map$name == "Northern Borders", 0.7, 0)),
+                nudge_y = ifelse(map$name == "Tabuk", 0.5,
+                                 ifelse(map$name == "Northern Borders", -0.50, 0))) +
+  labs(fill = "Insufficient Diet \n and Exercise") +
+  scale_fill_gradientn(colors = c("#f2f8fa", "#b4e0e2", "#88c4cd", "#73b2b5"),
+                       breaks = seq(0, max(map$ide), length.out = 5),
+                       labels = scales::comma(seq(0, max(map$ide), length.out = 5))) +
+  theme_void()
+
+map$hp <- data$High_BMI
+p6 <- ggplot() +
+  geom_sf(data = map, aes(fill = hp), color = "#231f20") +
+  geom_sf_label(data = map_centroids, aes(label = name_wrapped),
+                size = 3, color = "#54585C", fill = "#fffffc",
+                label.padding = unit(0.25, "lines"), label.r = unit(0.35, "lines"),
+                nudge_x = ifelse(map$name == "Tabuk", -0.10,
+                                 ifelse(map$name == "Northern Borders", 0.7, 0)),
+                nudge_y = ifelse(map$name == "Tabuk", 0.5,
+                                 ifelse(map$name == "Northern Borders", -0.50, 0))) +
+  labs(fill = "High BMI") +
+  scale_fill_gradientn(colors = c("#f2f8fa", "#b4e0e2", "#88c4cd", "#73b2b5"),
+                       breaks = seq(0, max(map$hp), length.out = 5),
+                       labels = scales::comma(seq(0, max(map$hp), length.out = 5))) +
+  theme_void()
+
+# Arrange maps in a 3×2 grid
+(p1 | p2) / (p3 | p4) / (p5 | p6)
+
+
+
+
+
+
+```

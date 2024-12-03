@@ -1,0 +1,14 @@
+/* Adjust the logo size and align it vertically */
+.navbar-brand img {
+  height: 40px !important; /* Set a smaller height */
+  width: auto !important;  /* Maintain the aspect ratio */
+  padding-left: 5px;       /* Adjust padding as needed */
+  margin-top: -10px;       /* Align the logo vertically */
+}
+
+/* Ensure the logo is vertically aligned within the navbar */
+.navbar {
+  display: flex;
+  align-items: center;
+  height: auto; /* Ensure the navbar height adapts to the logo size */
+}
